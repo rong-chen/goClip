@@ -1,0 +1,18 @@
+# 依赖与编译输出
+node_modules/
+dist/
+build/bin/
+bin/
+
+# 系统与 IDE 缓存
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.log
+
+# 临时数据库与测试数据
+*.db
+*.db-shm
+*.db-wal
