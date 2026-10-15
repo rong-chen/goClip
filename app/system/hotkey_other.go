@@ -91,14 +91,14 @@ func parseHotkey(s string) ([]hotkey.Modifier, hotkey.Key, error) {
 	for _, part := range parts {
 		token := strings.ToUpper(strings.TrimSpace(part))
 		switch token {
-		case "CMD", "COMMAND":
-			mods = append(mods, hotkey.ModCmd)
+		case "CMD", "COMMAND", "WIN", "WINDOWS", "SUPER":
+			mods = append(mods, hotkey.ModWin)
 		case "CTRL", "CONTROL":
 			mods = append(mods, hotkey.ModCtrl)
 		case "SHIFT":
 			mods = append(mods, hotkey.ModShift)
 		case "ALT", "OPTION", "OPT":
-			mods = append(mods, hotkey.ModOption)
+			mods = append(mods, hotkey.ModAlt)
 		default:
 			k, err := parseKey(token)
 			if err != nil {
