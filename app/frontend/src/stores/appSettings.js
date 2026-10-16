@@ -3,9 +3,11 @@ import { ref } from 'vue'
 import { GetAppSettings, SaveAppSettings } from '../../wailsjs/go/main/App'
 
 export const useAppSettingsStore = defineStore('appSettings', () => {
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  const defaultHK = isMac ? 'Cmd+Shift+V' : 'Ctrl+Shift+V'
   const autoStart = ref(false)
   const silentMode = ref(false)
-  const hotkey = ref('Cmd+Shift+V')
+  const hotkey = ref(defaultHK)
   const loading = ref(false)
   const saving = ref(false)
   const message = ref('')
@@ -18,7 +20,7 @@ export const useAppSettingsStore = defineStore('appSettings', () => {
         if (res) {
           autoStart.value = res.auto_start
           silentMode.value = res.silent_mode
-          hotkey.value = res.hotkey || 'Cmd+Shift+V'
+          hotkey.value = res.hotkey || defaultHK
         }
       }
     } catch (e) {

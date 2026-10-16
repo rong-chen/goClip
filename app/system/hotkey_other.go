@@ -44,7 +44,7 @@ func (p *otherPlatformHotkey) Register(keyStr string) error {
 
 	hk := hotkey.New(mods, key)
 	if err := hk.Register(); err != nil {
-		return fmt.Errorf("快捷键注册失败: %w", err)
+		return fmt.Errorf("快捷键注册失败 (可能已被系统或其他软件占用): %w", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -91,14 +91,17 @@ func parseHotkey(s string) ([]hotkey.Modifier, hotkey.Key, error) {
 	for _, part := range parts {
 		token := strings.ToUpper(strings.TrimSpace(part))
 		switch token {
-		case "CMD", "COMMAND", "WIN", "WINDOWS", "SUPER":
-			mods = append(mods, hotkey.ModWin)
+		case "CMD", "COMMAND":
+			// 在 Windows 上将 Cmd 智能兼容为 Ctrl，避免与系统 Win 键全局冲突
+			mods = appendUniqueMod(mods, hotkey.ModCtrl)
+		case "WIN", "WINDOWS", "SUPER":
+			mods = appendUniqueMod(mods, hotkey.ModWin)
 		case "CTRL", "CONTROL":
-			mods = append(mods, hotkey.ModCtrl)
+			mods = appendUniqueMod(mods, hotkey.ModCtrl)
 		case "SHIFT":
-			mods = append(mods, hotkey.ModShift)
+			mods = appendUniqueMod(mods, hotkey.ModShift)
 		case "ALT", "OPTION", "OPT":
-			mods = append(mods, hotkey.ModAlt)
+			mods = appendUniqueMod(mods, hotkey.ModAlt)
 		default:
 			k, err := parseKey(token)
 			if err != nil {
@@ -110,10 +113,19 @@ func parseHotkey(s string) ([]hotkey.Modifier, hotkey.Key, error) {
 	}
 
 	if !hasKey {
-		return nil, 0, fmt.Errorf("快捷键未包含普通按键: %s", s)
+		return nil, 0, fmt.Errorf("快捷键必须包含一个主按键（如字母、数字或功能键）: %s", s)
 	}
 
 	return mods, key, nil
+}
+
+func appendUniqueMod(mods []hotkey.Modifier, mod hotkey.Modifier) []hotkey.Modifier {
+	for _, m := range mods {
+		if m == mod {
+			return mods
+		}
+	}
+	return append(mods, mod)
 }
 
 func parseKey(k string) (hotkey.Key, error) {
