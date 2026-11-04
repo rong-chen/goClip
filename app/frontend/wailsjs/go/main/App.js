@@ -10,6 +10,10 @@ export function ClearHistory(arg1) {
   return window['go']['main']['App']['ClearHistory'](arg1);
 }
 
+export function ClearSystemClipboard() {
+  return window['go']['main']['App']['ClearSystemClipboard']();
+}
+
 export function DeleteCronTask(arg1) {
   return window['go']['main']['App']['DeleteCronTask'](arg1);
 }

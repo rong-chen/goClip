@@ -29,6 +29,16 @@ func goTrayToggleWindow() {
 	}
 }
 
+//export goTrayShowWindow
+func goTrayShowWindow() {
+	trayMu.Lock()
+	fn := trayHandler.OnToggle
+	trayMu.Unlock()
+	if fn != nil {
+		fn()
+	}
+}
+
 //export goTrayOpenSettings
 func goTrayOpenSettings() {
 	trayMu.Lock()

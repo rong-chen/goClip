@@ -92,6 +92,17 @@ func (m *Monitor) WriteImage(rawPngBytes []byte) error {
 	return err
 }
 
+// ClearSystemClipboard 清空当前操作系统剪贴板
+func (m *Monitor) ClearSystemClipboard() error {
+	m.mu.Lock()
+	m.lastWriteHash = ""
+	m.lastHash = ""
+	m.mu.Unlock()
+
+	_, err := clipboard.Write(m.ctx, clipboard.FmtText, []byte(""))
+	return err
+}
+
 func (m *Monitor) watchUnified() {
 	ch := clipboard.Watch(m.ctx)
 	for data := range ch {

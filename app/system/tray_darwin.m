@@ -4,6 +4,7 @@
 #import <Cocoa/Cocoa.h>
 
 extern void goTrayToggleWindow();
+extern void goTrayShowWindow();
 extern void goTrayOpenSettings();
 extern void goTrayQuitApp();
 
@@ -52,6 +53,13 @@ extern void goTrayQuitApp();
         NSMenuItem *quitItem = [[NSMenuItem alloc] initWithTitle:@"退出 GoClip" action:@selector(onMenuQuit:) keyEquivalent:@"q"];
         quitItem.target = self;
         [self.trayMenu addItem:quitItem];
+
+        [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification 
+                                                          object:nil 
+                                                           queue:[NSOperationQueue mainQueue] 
+                                                      usingBlock:^(NSNotification *note) {
+            goTrayShowWindow();
+        }];
     });
 }
 

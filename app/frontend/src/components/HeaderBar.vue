@@ -57,10 +57,36 @@
         <span>设置</span>
       </button>
 
-      <!-- 清空非置顶 -->
-      <button @click="confirmClear" class="icon-btn danger-btn" title="清空非置顶记录">
+      <!-- 清空剪贴板 -->
+      <button @click="showClearModal = true" class="icon-btn danger-btn" title="清空剪贴板">
         <Trash2 :size="14" />
       </button>
+    </div>
+
+    <!-- 清空剪贴板自定义确认弹窗 -->
+    <div v-if="showClearModal" class="modal-backdrop" @click="showClearModal = false">
+      <div class="confirm-dialog" @click.stop>
+        <div class="confirm-header">
+          <div class="confirm-icon-wrap">
+            <Trash2 :size="20" class="danger-icon" />
+          </div>
+          <div class="confirm-title-wrap">
+            <h4>清空剪贴板</h4>
+            <p>选择清空方式，操作将同步清空操作系统当前剪贴板内容</p>
+          </div>
+        </div>
+        <div class="confirm-actions">
+          <button class="btn btn-secondary" @click="showClearModal = false">
+            取消
+          </button>
+          <button class="btn btn-secondary-danger" @click="handleClear(true)">
+            清空未置顶
+          </button>
+          <button class="btn btn-danger-solid" @click="handleClear(false)">
+            全部清空
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 </template>
@@ -115,10 +141,11 @@ const hideToBackground = async () => {
   }
 }
 
-const confirmClear = () => {
-  if (confirm('是否确定清理所有非置顶记录？（已置顶的记录会被保留）')) {
-    clipStore.clearAll(true)
-  }
+const showClearModal = ref(false)
+
+const handleClear = async (keepPinned) => {
+  showClearModal.value = false
+  await clipStore.clearAll(keepPinned)
 }
 </script>
 
@@ -242,6 +269,7 @@ const confirmClear = () => {
   transition: all 0.15s ease;
   cursor: pointer;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .setting-btn {
@@ -263,12 +291,14 @@ const confirmClear = () => {
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+  padding: 0;
 }
 
 .icon-btn:hover {
@@ -280,5 +310,79 @@ const confirmClear = () => {
   background: rgba(239, 68, 68, 0.15);
   border-color: rgba(239, 68, 68, 0.3);
   color: #f87171;
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.confirm-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.confirm-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirm-title-wrap h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.confirm-title-wrap p {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+}
+
+.btn-secondary-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+}
+
+.btn-danger-solid {
+  background: var(--danger);
+  color: #fff;
 }
 </style>

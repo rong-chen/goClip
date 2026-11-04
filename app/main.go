@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
@@ -31,13 +30,6 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 7, G: 7, B: 9, A: 1}, // 与前端统一的深色底色 #070709
 		OnStartup:        app.startup,
 		OnShutdown:       app.shutdown,
-		OnBeforeClose: func(ctx context.Context) (prevent bool) {
-			if app.IsQuitting() {
-				return false
-			}
-			app.HideWindow()
-			return true
-		},
 		Bind: []interface{}{
 			app,
 		},

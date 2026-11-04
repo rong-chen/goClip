@@ -166,17 +166,15 @@ func (a *App) ToggleWindow() {
 
 	if a.isWindowVisible {
 		wailsRuntime.WindowHide(a.ctx)
-		wailsRuntime.Hide(a.ctx)
 		a.isWindowVisible = false
 	} else {
 		wailsRuntime.WindowShow(a.ctx)
 		wailsRuntime.WindowUnminimise(a.ctx)
-		wailsRuntime.Show(a.ctx)
 		a.isWindowVisible = true
 	}
 }
 
-// HideWindow 最小化/隐藏窗口至后台
+// HideWindow 隐藏窗口至后台
 func (a *App) HideWindow() {
 	if a.ctx == nil {
 		return
@@ -184,7 +182,6 @@ func (a *App) HideWindow() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	wailsRuntime.WindowHide(a.ctx)
-	wailsRuntime.Hide(a.ctx)
 	a.isWindowVisible = false
 }
 
@@ -275,9 +272,17 @@ func (a *App) DeleteItem(id string) error {
 	return a.storage.DeleteItem(id)
 }
 
-// ClearHistory 清空历史记录
+// ClearHistory 清空历史记录并清理当前系统剪贴板
 func (a *App) ClearHistory(keepPinned bool) error {
-	return a.storage.ClearHistory(keepPinned)
+	if err := a.storage.ClearHistory(keepPinned); err != nil {
+		return err
+	}
+	return a.monitor.ClearSystemClipboard()
+}
+
+// ClearSystemClipboard 清空当前操作系统剪贴板
+func (a *App) ClearSystemClipboard() error {
+	return a.monitor.ClearSystemClipboard()
 }
 
 // OpenImageInSystemViewer 解密图片并写入临时缓存，调用操作系统默认图片查看器原生打开

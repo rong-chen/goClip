@@ -7,6 +7,8 @@ export function ClearCronLogs(arg1:string):Promise<void>;
 
 export function ClearHistory(arg1:boolean):Promise<void>;
 
+export function ClearSystemClipboard():Promise<void>;
+
 export function DeleteCronTask(arg1:string):Promise<void>;
 
 export function DeleteItem(arg1:string):Promise<void>;
