@@ -23,13 +23,13 @@ type Storage struct {
 	dbPath    string
 }
 
-// NewStorage 初始化 SQLite 数据库与本地默认加密驱动 (AES-256-GCM)
+// NewStorage 初始化 SQLite 数据库与本地默认加密驱动
 func NewStorage() (*Storage, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		homeDir = "."
 	}
-	appDir := filepath.Join(homeDir, ".goclip")
+	appDir := filepath.Join(homeDir, GetAppDataDir())
 	if err := os.MkdirAll(appDir, 0700); err != nil {
 		return nil, fmt.Errorf("创建数据目录失败: %w", err)
 	}
@@ -95,6 +95,30 @@ func (s *Storage) initSchema() error {
 		key TEXT PRIMARY KEY,
 		value TEXT NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS cron_tasks (
+		id TEXT PRIMARY KEY,
+		name TEXT NOT NULL,
+		cron_expr TEXT NOT NULL,
+		script_content TEXT NOT NULL,
+		enabled INTEGER NOT NULL,
+		created_at INTEGER NOT NULL,
+		updated_at INTEGER NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS cron_logs (
+		id TEXT PRIMARY KEY,
+		task_id TEXT NOT NULL,
+		task_name TEXT NOT NULL,
+		status TEXT NOT NULL,
+		output TEXT NOT NULL,
+		exit_code INTEGER NOT NULL,
+		duration_ms INTEGER NOT NULL,
+		executed_at INTEGER NOT NULL
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_cron_logs_task_id ON cron_logs(task_id);
+	CREATE INDEX IF NOT EXISTS idx_cron_logs_executed ON cron_logs(executed_at DESC);
 	`
 	_, err := s.db.Exec(schema)
 	return err

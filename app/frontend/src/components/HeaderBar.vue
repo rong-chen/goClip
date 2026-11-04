@@ -32,9 +32,19 @@
       <button 
         @click="hideToBackground" 
         class="icon-btn" 
-        title="隐藏至后台静默运行 (按 Esc 或唤醒快捷键可随时呼出)"
+        title="隐藏至后台静默运行"
       >
-        <Minimize2 :size="15" />
+        <Minimize2 :size="14" />
+      </button>
+
+      <!-- 定时任务入口按钮 -->
+      <button 
+        @click="$emit('open-cron')" 
+        class="status-btn setting-btn" 
+        title="进入定时任务管理"
+      >
+        <Clock :size="14" />
+        <span>定时任务</span>
       </button>
 
       <!-- 设置页面入口按钮 -->
@@ -49,7 +59,7 @@
 
       <!-- 清空非置顶 -->
       <button @click="confirmClear" class="icon-btn danger-btn" title="清空非置顶记录">
-        <Trash2 :size="15" />
+        <Trash2 :size="14" />
       </button>
     </div>
   </header>
@@ -61,6 +71,7 @@ import {
   ClipboardList, 
   Search, 
   X, 
+  Clock,
   Settings, 
   Trash2,
   Minimize2
@@ -68,7 +79,7 @@ import {
 import { useClipboardStore } from '../stores/clipboard'
 import { HideWindow } from '../../wailsjs/go/main/App'
 
-const emit = defineEmits(['open-settings'])
+const emit = defineEmits(['open-settings', 'open-cron'])
 const clipStore = useClipboardStore()
 
 const searchInput = ref(clipStore.search)
@@ -218,20 +229,24 @@ const confirmClear = () => {
 }
 
 .status-btn {
+  height: 32px;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 0 10px;
   border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 500;
   transition: all 0.15s ease;
   cursor: pointer;
+  line-height: 1;
 }
 
 .setting-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-main);
 }
 
@@ -244,6 +259,7 @@ const confirmClear = () => {
 .icon-btn {
   width: 32px;
   height: 32px;
+  box-sizing: border-box;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);

@@ -62,3 +62,11 @@ func TestDefaultTransparentEncryption(t *testing.T) {
 	// 清理测试数据
 	s.DeleteItem("test-id-1")
 }
+
+// TestGetAppDataDir 验证环境目录获取逻辑
+func TestGetAppDataDir(t *testing.T) {
+	dir := GetAppDataDir()
+	if dir != ".goclip" && dir != ".goclip-dev" {
+		t.Fatalf("意外的数据目录: %s", dir)
+	}
+}

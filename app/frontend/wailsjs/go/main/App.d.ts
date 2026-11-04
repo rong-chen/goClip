@@ -3,13 +3,21 @@
 import {storage} from '../models';
 import {cloudsync} from '../models';
 
+export function ClearCronLogs(arg1:string):Promise<void>;
+
 export function ClearHistory(arg1:boolean):Promise<void>;
+
+export function DeleteCronTask(arg1:string):Promise<void>;
 
 export function DeleteItem(arg1:string):Promise<void>;
 
 export function GetAppSettings():Promise<storage.AppSettings>;
 
 export function GetCloudSyncConfig():Promise<storage.CloudSyncConfig>;
+
+export function GetCronLogs(arg1:string,arg2:number):Promise<Array<storage.CronLog>>;
+
+export function GetCronTasks():Promise<Array<storage.CronTask>>;
 
 export function GetItems(arg1:string,arg2:string,arg3:boolean,arg4:number,arg5:number):Promise<Array<storage.ClipboardItem>>;
 
@@ -21,15 +29,21 @@ export function LockVault():Promise<void>;
 
 export function OpenImageInSystemViewer(arg1:string):Promise<void>;
 
+export function RunCronTaskNow(arg1:string):Promise<storage.CronLog>;
+
 export function SaveAppSettings(arg1:storage.AppSettings):Promise<void>;
 
 export function SaveCloudSyncConfig(arg1:storage.CloudSyncConfig):Promise<void>;
+
+export function SaveCronTask(arg1:storage.CronTask):Promise<void>;
 
 export function SetMasterPassword(arg1:string):Promise<void>;
 
 export function ShowWindow():Promise<void>;
 
 export function TestCloudSync():Promise<cloudsync.SyncResult>;
+
+export function ToggleCronTask(arg1:string,arg2:boolean):Promise<void>;
 
 export function TogglePin(arg1:string):Promise<boolean>;
 

@@ -159,7 +159,7 @@
           <Database :size="18" class="card-icon" />
           <div class="card-titles">
             <h3>本地存储与历史管理</h3>
-            <p>SQLite 数据库存储路径: ~/.goclip/clipboard.db (采用 AES-256 默认加密)</p>
+            <p>SQLite 数据库存储路径为当前用户目录下的 .goclip 或 .goclip-dev</p>
           </div>
         </div>
 
@@ -524,7 +524,7 @@ const handleClearAll = () => {
 }
 
 .settings-card {
-  background: rgba(30, 41, 59, 0.5);
+  background: rgba(18, 18, 24, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--radius-md);
   padding: 18px 20px;
@@ -661,7 +661,7 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(20px);
-  background-color: #0f172a;
+  background-color: var(--bg-primary);
 }
 
 .hotkey-card-item {
@@ -978,7 +978,7 @@ input:checked + .slider:before {
 .confirm-dialog {
   width: 100%;
   max-width: 440px;
-  background: #1e293b;
+  background: var(--bg-secondary);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 24px;

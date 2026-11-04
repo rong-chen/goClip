@@ -12,10 +12,19 @@
       @back="currentView = 'home'" 
     />
 
-    <!-- 视图 2: 剪贴板主页面 -->
+    <!-- 视图 2: 定时任务页面 -->
+    <CronTasksView
+      v-else-if="currentView === 'cron'"
+      @back="currentView = 'home'"
+    />
+
+    <!-- 视图 3: 剪贴板主页面 -->
     <template v-else>
-      <!-- 顶部状态与搜索栏 (含 Settings 按钮) -->
-      <HeaderBar @open-settings="currentView = 'settings'" />
+      <!-- 顶部状态与搜索栏 (含 Settings 与 Cron 按钮) -->
+      <HeaderBar 
+        @open-settings="currentView = 'settings'" 
+        @open-cron="currentView = 'cron'"
+      />
 
       <!-- 分类筛选与时间范围栏 -->
       <FilterBar />
@@ -59,12 +68,13 @@ import HeaderBar from './components/HeaderBar.vue'
 import FilterBar from './components/FilterBar.vue'
 import ClipboardItemCard from './components/ClipboardItemCard.vue'
 import SettingsView from './views/SettingsView.vue'
+import CronTasksView from './views/CronTasksView.vue'
 import { useClipboardStore } from './stores/clipboard'
 import { HideWindow } from '../wailsjs/go/main/App'
 
 const clipStore = useClipboardStore()
 
-// 视图路由状态: 'home' 剪贴板列表 | 'settings' 设置页面
+// 视图路由状态: 'home' 剪贴板列表 | 'settings' 设置页面 | 'cron' 定时任务页面
 const currentView = ref('home')
 
 // 跨平台检测 (macOS 内嵌顶栏，Windows 原生暗黑标题栏)
@@ -72,7 +82,7 @@ const isMac = ref(true)
 
 const onKeyDown = async (e) => {
   if (e.key === 'Escape') {
-    if (currentView.value === 'settings') {
+    if (currentView.value === 'settings' || currentView.value === 'cron') {
       currentView.value = 'home'
     } else {
       try {

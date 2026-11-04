@@ -109,6 +109,56 @@ export namespace storage {
 	        this.last_sync_time = source["last_sync_time"];
 	    }
 	}
+	export class CronLog {
+	    id: string;
+	    task_id: string;
+	    task_name: string;
+	    status: string;
+	    output: string;
+	    exit_code: number;
+	    duration_ms: number;
+	    executed_at: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CronLog(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.task_id = source["task_id"];
+	        this.task_name = source["task_name"];
+	        this.status = source["status"];
+	        this.output = source["output"];
+	        this.exit_code = source["exit_code"];
+	        this.duration_ms = source["duration_ms"];
+	        this.executed_at = source["executed_at"];
+	    }
+	}
+	export class CronTask {
+	    id: string;
+	    name: string;
+	    cron_expr: string;
+	    script_content: string;
+	    enabled: boolean;
+	    created_at: number;
+	    updated_at: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CronTask(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.cron_expr = source["cron_expr"];
+	        this.script_content = source["script_content"];
+	        this.enabled = source["enabled"];
+	        this.created_at = source["created_at"];
+	        this.updated_at = source["updated_at"];
+	    }
+	}
 	export class SecuritySettings {
 	    has_master_password: boolean;
 	    is_locked: boolean;

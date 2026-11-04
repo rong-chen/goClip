@@ -46,3 +46,27 @@ type AppSettings struct {
 	Hotkey     string `json:"hotkey"`
 }
 
+// CronTask 定时任务模型
+type CronTask struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	CronExpr      string `json:"cron_expr"`
+	ScriptContent string `json:"script_content"`
+	Enabled       bool   `json:"enabled"`
+	CreatedAt     int64  `json:"created_at"`
+	UpdatedAt     int64  `json:"updated_at"`
+}
+
+// CronLog 定时任务执行日志模型
+type CronLog struct {
+	ID          string `json:"id"`
+	TaskID      string `json:"task_id"`
+	TaskName    string `json:"task_name"`
+	Status      string `json:"status"`
+	Output      string `json:"output"`
+	ExitCode    int    `json:"exit_code"`
+	DurationMs  int64  `json:"duration_ms"`
+	ExecutedAt  int64  `json:"executed_at"`
+}
+
+

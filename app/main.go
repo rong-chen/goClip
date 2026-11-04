@@ -28,7 +28,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 15, G: 23, B: 42, A: 1}, // 与前端统一的深色底色 #0f172a
+		BackgroundColour: &options.RGBA{R: 7, G: 7, B: 9, A: 1}, // 与前端统一的深色底色 #070709
 		OnStartup:        app.startup,
 		OnShutdown:       app.shutdown,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {

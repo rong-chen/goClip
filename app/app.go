@@ -13,6 +13,7 @@ import (
 
 	"app/clipboard"
 	"app/cloudsync"
+	"app/crontab"
 	"app/storage"
 	"app/system"
 
@@ -26,6 +27,7 @@ type App struct {
 	monitor         *clipboard.Monitor
 	syncManager     *cloudsync.SyncManager
 	hotkeyMgr       *system.HotkeyManager
+	scheduler       *crontab.Scheduler
 	mu              sync.Mutex
 	isWindowVisible bool
 	isSilentStart   bool
@@ -68,6 +70,13 @@ func NewApp() *App {
 		}
 	})
 
+	// 初始化定时任务调度器
+	a.scheduler = crontab.NewScheduler(store, func(logRecord *storage.CronLog) {
+		if a.ctx != nil {
+			wailsRuntime.EventsEmit(a.ctx, "cron:log", logRecord)
+		}
+	})
+
 	return a
 }
 
@@ -78,6 +87,11 @@ func (a *App) startup(ctx context.Context) {
 	// 启动剪贴板监听器
 	if err := a.monitor.Start(); err != nil {
 		log.Printf("启动剪贴板监听器异常: %v", err)
+	}
+
+	// 启动定时任务调度器
+	if err := a.scheduler.Start(); err != nil {
+		log.Printf("启动定时任务调度器异常: %v", err)
 	}
 
 	// 读取应用设置并注册全局快捷键
@@ -129,6 +143,9 @@ func (a *App) ShowWindow() {
 
 // shutdown 在程序关闭时调用
 func (a *App) shutdown(ctx context.Context) {
+	if a.scheduler != nil {
+		a.scheduler.Stop()
+	}
 	if a.hotkeyMgr != nil {
 		a.hotkeyMgr.Unregister()
 	}
@@ -297,3 +314,51 @@ func (a *App) SaveCloudSyncConfig(cfg storage.CloudSyncConfig) {}
 func (a *App) TestCloudSync() (*cloudsync.SyncResult, error) {
 	return a.syncManager.TestSync(a.ctx)
 }
+
+// GetCronTasks 获取所有定时任务列表
+func (a *App) GetCronTasks() ([]*storage.CronTask, error) {
+	return a.storage.GetCronTasks()
+}
+
+// SaveCronTask 保存或创建定时任务并重载调度器
+func (a *App) SaveCronTask(task storage.CronTask) error {
+	if err := a.storage.SaveCronTask(&task); err != nil {
+		return err
+	}
+	return a.scheduler.Reload()
+}
+
+// DeleteCronTask 删除定时任务及其运行日志并重载调度器
+func (a *App) DeleteCronTask(id string) error {
+	if err := a.storage.DeleteCronTask(id); err != nil {
+		return err
+	}
+	return a.scheduler.Reload()
+}
+
+// ToggleCronTask 切换定时任务启用状态并重载调度器
+func (a *App) ToggleCronTask(id string, enabled bool) error {
+	if err := a.storage.ToggleCronTask(id, enabled); err != nil {
+		return err
+	}
+	return a.scheduler.Reload()
+}
+
+// RunCronTaskNow 手动立即触发指定任务执行
+func (a *App) RunCronTaskNow(id string) (*storage.CronLog, error) {
+	return a.scheduler.RunTaskNow(id)
+}
+
+// GetCronLogs 获取执行日志列表
+func (a *App) GetCronLogs(taskID string, limit int) ([]*storage.CronLog, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	return a.storage.GetCronLogs(taskID, limit)
+}
+
+// ClearCronLogs 清空执行日志
+func (a *App) ClearCronLogs(taskID string) error {
+	return a.storage.ClearCronLogs(taskID)
+}
+

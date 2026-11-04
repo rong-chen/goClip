@@ -138,7 +138,7 @@ const formatTime = (ts) => {
 
 .card.pinned {
   border-color: rgba(245, 158, 11, 0.35);
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(24, 24, 32, 0.85);
 }
 
 .card-body {
@@ -216,7 +216,7 @@ const formatTime = (ts) => {
   object-fit: cover;
   border-radius: var(--radius-sm);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #0f172a;
+  background: var(--bg-primary);
 }
 
 .thumbnail:hover {

@@ -159,7 +159,7 @@ const togglePinnedOnly = () => {
 }
 
 .time-select option {
-  background: #1e293b;
+  background: var(--bg-secondary);
   color: #fff;
 }
 </style>
