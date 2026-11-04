@@ -2,11 +2,41 @@
 
 #include <stdint.h>
 #import <Cocoa/Cocoa.h>
+#import <objc/runtime.h>
 
 extern void goTrayToggleWindow();
 extern void goTrayShowWindow();
 extern void goTrayOpenSettings();
 extern void goTrayQuitApp();
+
+static void bringMainWindowToFront(void) {
+    for (NSWindow *window in [NSApp windows]) {
+        if ([window canBecomeKeyWindow]) {
+            [window makeKeyAndOrderFront:nil];
+            [NSApp activateIgnoringOtherApps:YES];
+            break;
+        }
+    }
+    goTrayShowWindow();
+}
+
+static BOOL custom_reopen(id self, SEL _cmd, NSApplication *sender, BOOL hasVisibleWindows) {
+    bringMainWindowToFront();
+    return YES;
+}
+
+static void hookAppDelegateReopen(void) {
+    id appDelegate = [NSApp delegate];
+    if (appDelegate != nil) {
+        Class delClass = [appDelegate class];
+        Method origMethod = class_getInstanceMethod(delClass, @selector(applicationShouldHandleReopen:hasVisibleWindows:));
+        if (origMethod != NULL) {
+            class_replaceMethod(delClass, @selector(applicationShouldHandleReopen:hasVisibleWindows:), (IMP)custom_reopen, "c@:@c");
+        } else {
+            class_addMethod(delClass, @selector(applicationShouldHandleReopen:hasVisibleWindows:), (IMP)custom_reopen, "c@:@c");
+        }
+    }
+}
 
 @interface GoClipTrayController : NSObject
 @property (strong) NSStatusItem *statusItem;
@@ -54,11 +84,20 @@ extern void goTrayQuitApp();
         quitItem.target = self;
         [self.trayMenu addItem:quitItem];
 
+        hookAppDelegateReopen();
+
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidBecomeActiveNotification 
                                                           object:nil 
                                                            queue:[NSOperationQueue mainQueue] 
                                                       usingBlock:^(NSNotification *note) {
-            goTrayShowWindow();
+            bringMainWindowToFront();
+        }];
+
+        [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidFinishLaunchingNotification 
+                                                          object:nil 
+                                                           queue:[NSOperationQueue mainQueue] 
+                                                      usingBlock:^(NSNotification *note) {
+            hookAppDelegateReopen();
         }];
     });
 }

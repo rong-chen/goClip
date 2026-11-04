@@ -32,7 +32,7 @@ func goTrayToggleWindow() {
 //export goTrayShowWindow
 func goTrayShowWindow() {
 	trayMu.Lock()
-	fn := trayHandler.OnToggle
+	fn := trayHandler.OnShow
 	trayMu.Unlock()
 	if fn != nil {
 		fn()

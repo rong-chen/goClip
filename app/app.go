@@ -106,6 +106,9 @@ func (a *App) startup(ctx context.Context) {
 		OnToggle: func() {
 			a.ToggleWindow()
 		},
+		OnShow: func() {
+			a.ShowWindow()
+		},
 		OnSettings: func() {
 			a.ShowWindow()
 			if a.ctx != nil {
