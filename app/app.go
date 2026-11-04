@@ -31,6 +31,7 @@ type App struct {
 	mu              sync.Mutex
 	isWindowVisible bool
 	isSilentStart   bool
+	isQuitting      bool
 }
 
 // NewApp 初始化 App
@@ -112,9 +113,7 @@ func (a *App) startup(ctx context.Context) {
 			}
 		},
 		OnQuit: func() {
-			if a.ctx != nil {
-				wailsRuntime.Quit(a.ctx)
-			}
+			a.Quit()
 		},
 	})
 
@@ -187,6 +186,25 @@ func (a *App) HideWindow() {
 	wailsRuntime.WindowHide(a.ctx)
 	wailsRuntime.Hide(a.ctx)
 	a.isWindowVisible = false
+}
+
+// IsQuitting 返回当前是否正在执行退出流程
+func (a *App) IsQuitting() bool {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.isQuitting
+}
+
+// Quit 退出应用程序并清理资源
+func (a *App) Quit() {
+	a.mu.Lock()
+	a.isQuitting = true
+	a.mu.Unlock()
+
+	if a.ctx != nil {
+		wailsRuntime.Quit(a.ctx)
+	}
+	os.Exit(0)
 }
 
 // GetAppSettings 获取应用偏好设置（开机自启、静默模式、全局快捷键）

@@ -32,8 +32,11 @@ func main() {
 		OnStartup:        app.startup,
 		OnShutdown:       app.shutdown,
 		OnBeforeClose: func(ctx context.Context) (prevent bool) {
+			if app.IsQuitting() {
+				return false
+			}
 			app.HideWindow()
-			return true // 阻止真正退出，转入静默后台常驻监听
+			return true
 		},
 		Bind: []interface{}{
 			app,

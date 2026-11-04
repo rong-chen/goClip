@@ -46,12 +46,20 @@ export function HideWindow() {
   return window['go']['main']['App']['HideWindow']();
 }
 
+export function IsQuitting() {
+  return window['go']['main']['App']['IsQuitting']();
+}
+
 export function LockVault() {
   return window['go']['main']['App']['LockVault']();
 }
 
 export function OpenImageInSystemViewer(arg1) {
   return window['go']['main']['App']['OpenImageInSystemViewer'](arg1);
+}
+
+export function Quit() {
+  return window['go']['main']['App']['Quit']();
 }
 
 export function RunCronTaskNow(arg1) {

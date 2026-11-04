@@ -25,9 +25,13 @@ export function GetSecuritySettings():Promise<storage.SecuritySettings>;
 
 export function HideWindow():Promise<void>;
 
+export function IsQuitting():Promise<boolean>;
+
 export function LockVault():Promise<void>;
 
 export function OpenImageInSystemViewer(arg1:string):Promise<void>;
+
+export function Quit():Promise<void>;
 
 export function RunCronTaskNow(arg1:string):Promise<storage.CronLog>;
 

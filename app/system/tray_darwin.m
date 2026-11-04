@@ -25,26 +25,25 @@ extern void goTrayQuitApp();
 
         NSData *data = [NSData dataWithBytes:bytes length:len];
         NSImage *image = [[NSImage alloc] initWithData:data];
-        [image setTemplate:YES]; // 设置为 Template，macOS 顶栏暗黑模式下自动转为高亮纯白
+        [image setTemplate:YES];
         [image setSize:NSMakeSize(18, 18)];
 
         NSStatusBarButton *button = self.statusItem.button;
         if (button != nil) {
             button.image = image;
-            button.toolTip = @"GoClip - 本地剪贴板管理器 (点击切换)";
+            button.toolTip = @"GoClip";
             button.target = self;
             button.action = @selector(onButtonClick:);
             [button sendActionOn:(NSEventMaskLeftMouseUp | NSEventMaskRightMouseUp)];
         }
 
-        // 构建右键快捷菜单
         self.trayMenu = [[NSMenu alloc] initWithTitle:@"GoClip"];
 
-        NSMenuItem *toggleItem = [[NSMenuItem alloc] initWithTitle:@"显示/隐藏 GoClip" action:@selector(onMenuToggle:) keyEquivalent:@""];
+        NSMenuItem *toggleItem = [[NSMenuItem alloc] initWithTitle:@"显示或隐藏窗口" action:@selector(onMenuToggle:) keyEquivalent:@""];
         toggleItem.target = self;
         [self.trayMenu addItem:toggleItem];
 
-        NSMenuItem *settingsItem = [[NSMenuItem alloc] initWithTitle:@"偏好设置..." action:@selector(onMenuSettings:) keyEquivalent:@","];
+        NSMenuItem *settingsItem = [[NSMenuItem alloc] initWithTitle:@"偏好设置" action:@selector(onMenuSettings:) keyEquivalent:@","];
         settingsItem.target = self;
         [self.trayMenu addItem:settingsItem];
 
@@ -58,11 +57,15 @@ extern void goTrayQuitApp();
 
 - (void)onButtonClick:(id)sender {
     NSEvent *event = [NSApp currentEvent];
-    if (event.type == NSEventTypeRightMouseUp) {
-        // 右键弹出菜单
-        [self.statusItem popUpStatusItemMenu:self.trayMenu];
+    BOOL isRightClick = (event.type == NSEventTypeRightMouseUp || 
+                         event.type == NSEventTypeRightMouseDown || 
+                         (event.modifierFlags & NSEventModifierFlagControl));
+
+    if (isRightClick) {
+        [self.statusItem setMenu:self.trayMenu];
+        [self.statusItem.button performClick:nil];
+        [self.statusItem setMenu:nil];
     } else {
-        // 左键点击直接唤出/隐藏主窗口
         goTrayToggleWindow();
     }
 }
@@ -77,6 +80,9 @@ extern void goTrayQuitApp();
 
 - (void)onMenuQuit:(id)sender {
     goTrayQuitApp();
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(100 * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
+        [NSApp terminate:nil];
+    });
 }
 
 @end
