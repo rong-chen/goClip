@@ -39,63 +39,70 @@
             :key="task.id" 
             class="task-item"
           >
-            <div class="task-info">
-              <div class="task-name-row">
+            <!-- 头部：任务名称与周期 -->
+            <div class="task-header">
+              <div class="task-title-wrap">
                 <span class="task-name">{{ task.name }}</span>
                 <span class="cron-badge">{{ formatScheduleText(task.cron_expr) }}</span>
               </div>
-              <div class="task-script-preview">
-                <code>{{ task.script_content }}</code>
-              </div>
             </div>
 
-            <div class="task-actions">
-              <!-- 启停开关 -->
-              <label class="toggle-switch" title="启用或停用">
-                <input 
-                  type="checkbox" 
-                  :checked="task.enabled" 
-                  @change="onToggleTask(task)"
-                />
-                <span class="slider"></span>
-              </label>
+            <!-- 底部：一整排操作按钮与状态 -->
+            <div class="task-footer">
+              <div class="task-status-wrap">
+                <label class="toggle-switch" title="启用或停用">
+                  <input 
+                    type="checkbox" 
+                    :checked="task.enabled" 
+                    @change="onToggleTask(task)"
+                  />
+                  <span class="slider"></span>
+                </label>
+                <span class="status-label">{{ task.enabled ? '已启用' : '已停用' }}</span>
+              </div>
 
-              <!-- 手动立即执行 -->
-              <button 
-                class="action-btn" 
-                :disabled="cronStore.runningTaskId === task.id"
-                @click="onRunNow(task)" 
-                title="立即执行一次"
-              >
-                <Play :size="14" />
-              </button>
+              <div class="task-actions">
+                <!-- 手动立即执行 -->
+                <button 
+                  class="action-btn" 
+                  :disabled="cronStore.runningTaskId === task.id"
+                  @click="onRunNow(task)" 
+                  title="立即执行一次"
+                >
+                  <Play :size="13" />
+                  <span>运行</span>
+                </button>
 
-              <!-- 查看日志 -->
-              <button 
-                class="action-btn" 
-                @click="openLogs(task)" 
-                title="查看执行日志"
-              >
-                <FileText :size="14" />
-              </button>
+                <!-- 查看日志 -->
+                <button 
+                  class="action-btn" 
+                  @click="openLogs(task)" 
+                  title="查看执行日志"
+                >
+                  <FileText :size="13" />
+                  <span>日志</span>
+                </button>
 
-              <!-- 编辑 -->
-              <button 
-                class="action-btn" 
-                @click="openEditModal(task)" 
-                title="编辑任务"
-              >
-                <Edit3 :size="14" />
-              </button>
+                <!-- 编辑 -->
+                <button 
+                  class="action-btn" 
+                  @click="openEditModal(task)" 
+                  title="编辑任务"
+                >
+                  <Edit3 :size="13" />
+                  <span>编辑</span>
+                </button>
 
-              <!-- 删除 -->
-              <button 
-                class="action-btn danger-btn" 
-                @click="onDeleteTask(task.id)" 
-                title="删除任务"
-              >
-                <Trash2 :size="14" />
-              </button>
+                <!-- 删除 -->
+                <button 
+                  class="action-btn danger-btn" 
+                  @click="onDeleteTask(task.id)" 
+                  title="删除任务"
+                >
+                  <Trash2 :size="13" />
+                  <span>删除</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -663,22 +670,26 @@ const formatTime = (ts) => {
 
 .task-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
   background: rgba(12, 12, 16, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease;
 }
 
-.task-info {
+.task-item:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.task-header {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.task-name-row {
+.task-title-wrap {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -699,39 +710,52 @@ const formatTime = (ts) => {
   font-family: inherit;
 }
 
-.task-script-preview code {
+.task-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.task-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-label {
   font-size: 12px;
   color: var(--text-muted);
-  font-family: monospace;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 2px 6px;
-  border-radius: 4px;
 }
 
 .task-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .action-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
+  gap: 5px;
   height: 28px;
+  padding: 0 10px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
 }
 
 .danger-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.15);
   color: var(--danger);
 }
 
