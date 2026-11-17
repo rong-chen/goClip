@@ -9,6 +9,7 @@ export const useClipboardStore = defineStore('clipboard', {
     pinnedOnly: false,
     timeFilter: 'all', // 'all' | 'today' | '7days' | '30days'
     loading: false,
+    selectedIndex: 0,
     selectedId: null,
     previewImage: null,
     toastMessage: '',
@@ -77,6 +78,11 @@ export const useClipboardStore = defineStore('clipboard', {
         // 防竞态竞争：只有最新一次请求的结果才允许生效，杜绝旧请求覆盖新输入
         if (currentReq === this.searchRequestId) {
           this.items = res || []
+          if (this.selectedIndex >= this.filteredItems.length) {
+            this.selectFirst()
+          } else if (this.filteredItems.length > 0) {
+            this.selectedId = this.filteredItems[this.selectedIndex]?.id
+          }
         }
       } catch (err) {
         console.error('获取剪贴板历史失败:', err)
@@ -128,6 +134,7 @@ export const useClipboardStore = defineStore('clipboard', {
     // 搜索输入触发：立即响应前端计算属性，并防抖向后端发起同步
     setSearch(text) {
       this.search = text
+      this.selectFirst()
       if (this.debounceTimer) {
         clearTimeout(this.debounceTimer)
       }
@@ -139,6 +146,7 @@ export const useClipboardStore = defineStore('clipboard', {
     setFilter(type) {
       this.filterType = type
       this.pinnedOnly = false // 点击切换类型时自动重置“仅看置顶”，恢复完整浏览
+      this.selectFirst()
       this.fetchItems()
     },
 
@@ -147,7 +155,52 @@ export const useClipboardStore = defineStore('clipboard', {
       if (val) {
         this.filterType = 'all'
       }
+      this.selectFirst()
       this.fetchItems()
+    },
+
+    // 选中第一项
+    selectFirst() {
+      this.selectedIndex = 0
+      if (this.filteredItems.length > 0) {
+        this.selectedId = this.filteredItems[0].id
+      } else {
+        this.selectedId = null
+      }
+    },
+
+    // 向下移动选中项
+    selectNext() {
+      if (this.filteredItems.length === 0) return
+      if (this.selectedIndex < this.filteredItems.length - 1) {
+        this.selectedIndex++
+        this.selectedId = this.filteredItems[this.selectedIndex]?.id
+      }
+    },
+
+    // 向上移动选中项
+    selectPrev() {
+      if (this.filteredItems.length === 0) return
+      if (this.selectedIndex > 0) {
+        this.selectedIndex--
+        this.selectedId = this.filteredItems[this.selectedIndex]?.id
+      }
+    },
+
+    // 直接指定选中索引
+    setSelectedIndex(idx) {
+      if (idx >= 0 && idx < this.filteredItems.length) {
+        this.selectedIndex = idx
+        this.selectedId = this.filteredItems[idx]?.id
+      }
+    },
+
+    // 复制当前选中的剪贴板记录
+    async copySelected() {
+      const item = this.filteredItems[this.selectedIndex]
+      if (item) {
+        await this.copyItem(item.id)
+      }
     },
 
     async openSystemViewer(id) {
@@ -182,6 +235,7 @@ export const useClipboardStore = defineStore('clipboard', {
         this.items.splice(idx, 1)
       }
       this.items.unshift(newItem)
+      this.selectFirst()
     }
   }
 })

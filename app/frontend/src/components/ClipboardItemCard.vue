@@ -1,7 +1,7 @@
 <template>
   <div 
-    :class="['card', item.is_pinned ? 'pinned' : '', item.type]"
-    @click="copy"
+    :class="['card', item.is_pinned ? 'pinned' : '', item.type, isSelected ? 'selected' : '']"
+    @click="handleClick"
   >
     <!-- 卡片主体内容 -->
     <div class="card-body">
@@ -77,8 +77,19 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
+  },
+  isSelected: {
+    type: Boolean,
+    default: false
   }
 })
+
+const emit = defineEmits(['select'])
+
+const handleClick = () => {
+  emit('select')
+  copy()
+}
 
 const clipStore = useClipboardStore()
 
@@ -134,6 +145,21 @@ const formatTime = (ts) => {
   border-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card.selected {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 16px rgba(56, 189, 248, 0.12);
+}
+
+.card.selected.pinned {
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 1px #fbbf24, 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.card.selected .card-actions {
+  opacity: 1;
 }
 
 .card.pinned {

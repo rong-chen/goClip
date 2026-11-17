@@ -109,6 +109,9 @@ func (a *App) startup(ctx context.Context) {
 		OnShow: func() {
 			a.ShowWindow()
 		},
+		OnHide: func() {
+			a.HideWindow()
+		},
 		OnSettings: func() {
 			a.ShowWindow()
 			if a.ctx != nil {
@@ -141,6 +144,7 @@ func (a *App) ShowWindow() {
 	wailsRuntime.WindowUnminimise(a.ctx)
 	wailsRuntime.Show(a.ctx)
 	a.isWindowVisible = true
+	wailsRuntime.EventsEmit(a.ctx, "window:shown")
 }
 
 // shutdown 在程序关闭时调用
@@ -164,16 +168,28 @@ func (a *App) ToggleWindow() {
 	if a.ctx == nil {
 		return
 	}
+	if runtime.GOOS == "darwin" {
+		if system.IsWindowActive() {
+			a.HideWindow()
+		} else {
+			a.ShowWindow()
+		}
+		return
+	}
+
 	a.mu.Lock()
 	defer a.mu.Unlock()
 
 	if a.isWindowVisible {
 		wailsRuntime.WindowHide(a.ctx)
+		wailsRuntime.Hide(a.ctx)
 		a.isWindowVisible = false
 	} else {
 		wailsRuntime.WindowShow(a.ctx)
 		wailsRuntime.WindowUnminimise(a.ctx)
+		wailsRuntime.Show(a.ctx)
 		a.isWindowVisible = true
+		wailsRuntime.EventsEmit(a.ctx, "window:shown")
 	}
 }
 
@@ -185,6 +201,7 @@ func (a *App) HideWindow() {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	wailsRuntime.WindowHide(a.ctx)
+	wailsRuntime.Hide(a.ctx)
 	a.isWindowVisible = false
 }
 

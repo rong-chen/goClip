@@ -46,9 +46,11 @@
 
         <div v-else class="cards-list">
           <ClipboardItemCard 
-            v-for="item in clipStore.filteredItems" 
+            v-for="(item, index) in clipStore.filteredItems" 
             :key="item.id" 
             :item="item" 
+            :is-selected="index === clipStore.selectedIndex"
+            @select="clipStore.setSelectedIndex(index)"
           />
         </div>
       </main>
@@ -62,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { ClipboardList } from 'lucide-vue-next'
 import HeaderBar from './components/HeaderBar.vue'
 import FilterBar from './components/FilterBar.vue'
@@ -80,8 +82,23 @@ const currentView = ref('home')
 // 跨平台检测 (macOS 内嵌顶栏，Windows 原生暗黑标题栏)
 const isMac = ref(true)
 
+const scrollToSelected = () => {
+  nextTick(() => {
+    const el = document.querySelector('.card.selected')
+    if (el) {
+      el.scrollIntoView({ block: 'nearest' })
+    }
+  })
+}
+
 const onKeyDown = async (e) => {
+  if (e.isComposing) return
+
   if (e.key === 'Escape') {
+    if (clipStore.previewImage) {
+      clipStore.closeImageModal()
+      return
+    }
     if (currentView.value === 'settings' || currentView.value === 'cron') {
       currentView.value = 'home'
     } else {
@@ -93,11 +110,34 @@ const onKeyDown = async (e) => {
         console.warn('Esc 隐藏窗口异常:', err)
       }
     }
+    return
   }
+
+  // 仅在主列表页响应快捷键上下选择与回车复制
+  if (currentView.value === 'home' && !clipStore.previewImage) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      clipStore.selectNext()
+      scrollToSelected()
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      clipStore.selectPrev()
+      scrollToSelected()
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      await clipStore.copySelected()
+    }
+  }
+}
+
+const handleWindowShow = () => {
+  clipStore.selectFirst()
+  scrollToSelected()
 }
 
 onMounted(async () => {
   window.addEventListener('keydown', onKeyDown)
+  window.addEventListener('focus', handleWindowShow)
 
   try {
     if (window.runtime && window.runtime.Environment) {
@@ -111,11 +151,16 @@ onMounted(async () => {
   }
 
   await clipStore.fetchItems()
+  clipStore.selectFirst()
 
-  // 监听后端 Wails 剪贴板事件通知与设置跳转通知
+  // 监听后端 Wails 剪贴板事件通知、窗口唤醒与设置跳转通知
   if (window.runtime && window.runtime.EventsOn) {
+    window.runtime.EventsOn('window:shown', () => {
+      handleWindowShow()
+    })
     window.runtime.EventsOn('clipboard:changed', (newItem) => {
       clipStore.handleNewItem(newItem)
+      scrollToSelected()
     })
     window.runtime.EventsOn('route:settings', () => {
       currentView.value = 'settings'
@@ -125,7 +170,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('focus', handleWindowShow)
   if (window.runtime && window.runtime.EventsOff) {
+    window.runtime.EventsOff('window:shown')
     window.runtime.EventsOff('clipboard:changed')
     window.runtime.EventsOff('route:settings')
   }

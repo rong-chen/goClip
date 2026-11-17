@@ -188,7 +188,10 @@ func winTrayProc(hWnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		switch cmdID {
 		case ID_TRAY_SHOW:
 			winTrayMu.Lock()
-			fn := winTrayHandler.OnToggle
+			fn := winTrayHandler.OnShow
+			if fn == nil {
+				fn = winTrayHandler.OnToggle
+			}
 			winTrayMu.Unlock()
 			if fn != nil {
 				go fn()
@@ -220,6 +223,11 @@ func winTrayProc(hWnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 }
 
 // InitTray 在 Windows 系统任务栏通知区域常驻 GoClip 托盘图标
+// IsWindowActive 检查 Windows 平台下主窗口状态
+func IsWindowActive() bool {
+	return false
+}
+
 func InitTray(handler TrayHandler) {
 	winTrayMu.Lock()
 	winTrayHandler = handler

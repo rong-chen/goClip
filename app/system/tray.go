@@ -8,6 +8,7 @@ var TrayIconData []byte
 type TrayHandler struct {
 	OnToggle   func()
 	OnShow     func()
+	OnHide     func()
 	OnSettings func()
 	OnQuit     func()
 }

@@ -14,6 +14,7 @@
     <div class="search-container">
       <Search :size="15" class="search-icon" />
       <input
+        ref="inputRef"
         type="text"
         v-model="searchInput"
         @input="onInput"
@@ -92,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { 
   ClipboardList, 
   Search, 
@@ -108,7 +109,29 @@ import { HideWindow } from '../../wailsjs/go/main/App'
 const emit = defineEmits(['open-settings', 'open-cron'])
 const clipStore = useClipboardStore()
 
+const inputRef = ref(null)
 const searchInput = ref(clipStore.search)
+
+const focusSearchInput = () => {
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+onMounted(() => {
+  focusSearchInput()
+  window.addEventListener('focus', focusSearchInput)
+  if (window.runtime && window.runtime.EventsOn) {
+    window.runtime.EventsOn('window:shown', focusSearchInput)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('focus', focusSearchInput)
+  if (window.runtime && window.runtime.EventsOff) {
+    window.runtime.EventsOff('window:shown', focusSearchInput)
+  }
+})
 
 watch(() => clipStore.search, (val) => {
   if (searchInput.value !== val) {
