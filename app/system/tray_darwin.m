@@ -166,20 +166,6 @@ static void hookAppDelegateReopen(void) {
             bringMainWindowToFront();
         }];
 
-        [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidHideNotification 
-                                                          object:nil 
-                                                           queue:[NSOperationQueue mainQueue] 
-                                                      usingBlock:^(NSNotification *note) {
-            goTrayHideWindow();
-        }];
-
-        [[NSNotificationCenter defaultCenter] addObserverForName:NSWindowDidMiniaturizeNotification 
-                                                          object:nil 
-                                                           queue:[NSOperationQueue mainQueue] 
-                                                      usingBlock:^(NSNotification *note) {
-            goTrayHideWindow();
-        }];
-
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidFinishLaunchingNotification 
                                                           object:nil 
                                                            queue:[NSOperationQueue mainQueue] 

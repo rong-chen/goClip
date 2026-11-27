@@ -110,7 +110,9 @@ func (a *App) startup(ctx context.Context) {
 			a.ShowWindow()
 		},
 		OnHide: func() {
-			a.HideWindow()
+			a.mu.Lock()
+			a.isWindowVisible = false
+			a.mu.Unlock()
 		},
 		OnSettings: func() {
 			a.ShowWindow()
@@ -139,11 +141,12 @@ func (a *App) ShowWindow() {
 		return
 	}
 	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.isWindowVisible = true
+	a.mu.Unlock()
+
 	wailsRuntime.WindowShow(a.ctx)
 	wailsRuntime.WindowUnminimise(a.ctx)
 	wailsRuntime.Show(a.ctx)
-	a.isWindowVisible = true
 	wailsRuntime.EventsEmit(a.ctx, "window:shown")
 }
 
@@ -178,18 +181,13 @@ func (a *App) ToggleWindow() {
 	}
 
 	a.mu.Lock()
-	defer a.mu.Unlock()
+	visible := a.isWindowVisible
+	a.mu.Unlock()
 
-	if a.isWindowVisible {
-		wailsRuntime.WindowHide(a.ctx)
-		wailsRuntime.Hide(a.ctx)
-		a.isWindowVisible = false
+	if visible {
+		a.HideWindow()
 	} else {
-		wailsRuntime.WindowShow(a.ctx)
-		wailsRuntime.WindowUnminimise(a.ctx)
-		wailsRuntime.Show(a.ctx)
-		a.isWindowVisible = true
-		wailsRuntime.EventsEmit(a.ctx, "window:shown")
+		a.ShowWindow()
 	}
 }
 
@@ -199,10 +197,11 @@ func (a *App) HideWindow() {
 		return
 	}
 	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.isWindowVisible = false
+	a.mu.Unlock()
+
 	wailsRuntime.WindowHide(a.ctx)
 	wailsRuntime.Hide(a.ctx)
-	a.isWindowVisible = false
 }
 
 // IsQuitting 返回当前是否正在执行退出流程

@@ -26,7 +26,7 @@ func goTrayToggleWindow() {
 	fn := trayHandler.OnToggle
 	trayMu.Unlock()
 	if fn != nil {
-		fn()
+		go fn()
 	}
 }
 
@@ -36,7 +36,7 @@ func goTrayShowWindow() {
 	fn := trayHandler.OnShow
 	trayMu.Unlock()
 	if fn != nil {
-		fn()
+		go fn()
 	}
 }
 
@@ -46,7 +46,7 @@ func goTrayHideWindow() {
 	fn := trayHandler.OnHide
 	trayMu.Unlock()
 	if fn != nil {
-		fn()
+		go fn()
 	}
 }
 
@@ -56,7 +56,7 @@ func goTrayOpenSettings() {
 	fn := trayHandler.OnSettings
 	trayMu.Unlock()
 	if fn != nil {
-		fn()
+		go fn()
 	}
 }
 
@@ -66,7 +66,7 @@ func goTrayQuitApp() {
 	fn := trayHandler.OnQuit
 	trayMu.Unlock()
 	if fn != nil {
-		fn()
+		go fn()
 	}
 }
 
